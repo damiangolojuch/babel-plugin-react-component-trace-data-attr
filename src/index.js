@@ -43,11 +43,14 @@ const handleOpeningElement = (t, path, options) => {
           options.attribute
         );
       } else {
-        parentDataAttrExpression = t.memberExpression(
+        const elementDataAttr = t.memberExpression(
           functionParent.node.params[0],
           t.stringLiteral(options.attribute),
           true,
         );
+
+        // functionParent.node.params[0] must be defined
+        parentDataAttrExpression = t.logicalExpression("&&", functionParent.node.params[0], elementDataAttr);
       }
     }
   } else {
