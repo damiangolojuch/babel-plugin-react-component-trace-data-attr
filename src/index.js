@@ -17,6 +17,31 @@ const findOrAddDataProperty = (t, properties, identifier, attribute) => {
   return identifier;
 }
 
+const getParentDataAttrExpression = (t, path, options, functionParent) => {
+  // It is safe to handle nodes with only one param, because probably it is props splitting
+  if (functionParent.node.params.length !== 1) {
+    return;
+  }
+
+  if (functionParent.node.params[0].type === 'ObjectPattern') {
+    return findOrAddDataProperty(
+      t,
+      functionParent.node.params[0].properties,
+      path.scope.generateUidIdentifier(),
+      options.attribute
+    );
+  } else {
+    const elementDataAttr = t.memberExpression(
+      functionParent.node.params[0],
+      t.stringLiteral(options.attribute),
+      true,
+    );
+
+    // functionParent.node.params[0] must be defined
+    return t.logicalExpression("&&", functionParent.node.params[0], elementDataAttr);
+  }
+};
+
 const handleOpeningElement = (t, path, options) => {
   const functionParent = path.getFunctionParent();
 
@@ -26,33 +51,22 @@ const handleOpeningElement = (t, path, options) => {
   if (!functionParent) return;
 
   if (functionParent.type == "ClassMethod" || functionParent.parent.type == "ClassProperty") {
+    // Class components
     componentName = functionParent.findParent((path) => path.isClassExpression() || path.isClassDeclaration()).node.id.name;
     parentDataAttrExpression = t.memberExpression(
       t.memberExpression(t.thisExpression(), t.identifier('props')),
       t.stringLiteral(options.attribute),
       true,
     );
-  } else if (functionParent.parent.type === "VariableDeclarator") {
-    componentName = functionParent.parent.id.name;
-    if (functionParent.node.params.length === 1) {
-      if (functionParent.node.params[0].type === 'ObjectPattern') {
-        parentDataAttrExpression = findOrAddDataProperty(
-          t,
-          functionParent.node.params[0].properties,
-          path.scope.generateUidIdentifier(),
-          options.attribute
-        );
-      } else {
-        const elementDataAttr = t.memberExpression(
-          functionParent.node.params[0],
-          t.stringLiteral(options.attribute),
-          true,
-        );
 
-        // functionParent.node.params[0] must be defined
-        parentDataAttrExpression = t.logicalExpression("&&", functionParent.node.params[0], elementDataAttr);
-      }
-    }
+  } else if (functionParent.parent.type === "VariableDeclarator") {
+    // Function components without decorators
+    componentName = functionParent.parent.id.name;
+    parentDataAttrExpression = getParentDataAttrExpression(t, path, options, functionParent);
+  } else if (functionParent.parent.type === "CallExpression" && (functionParent.parent.callee.name === 'memo' || (functionParent.parent.callee.property && functionParent.parent.callee.property.name === 'memo'))) {
+    // Function components with memo
+    componentName = functionParent.parentPath.parent.id.name;
+    parentDataAttrExpression = getParentDataAttrExpression(t, path, options, functionParent);
   } else {
     return;
   }
