@@ -65,7 +65,14 @@ const handleOpeningElement = (t, path, options) => {
     parentDataAttrExpression = getParentDataAttrExpression(t, path, options, functionParent);
   } else if (functionParent.parent.type === "CallExpression" && (functionParent.parent.callee.name === 'memo' || (functionParent.parent.callee.property && functionParent.parent.callee.property.name === 'memo'))) {
     // Function components with memo
-    componentName = functionParent.parentPath.parent.id.name;
+    let parentPath = functionParent.parentPath;
+
+    // Looking for variable declaration.
+    while (parentPath.parent.type !== 'VariableDeclarator') {
+      parentPath = parentPath.parentPath;
+    }
+
+    componentName = parentPath.parent.id.name;
     parentDataAttrExpression = getParentDataAttrExpression(t, path, options, functionParent);
   } else {
     return;
