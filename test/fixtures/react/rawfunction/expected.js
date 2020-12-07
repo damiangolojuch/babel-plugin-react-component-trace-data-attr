@@ -5,8 +5,8 @@ function SubComponent() {
 }
 
 const componentName = () => {
-  return <div data-qa="component-name">
-    <SubCoponent />
+  return <div data-component-trace={'' + ' component-name'}>
+    <SubCoponent data-component-trace={'' + ' component-name'} />
   </div>;
 };
 

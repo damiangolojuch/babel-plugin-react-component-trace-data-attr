@@ -1,8 +1,8 @@
 import React, { Component, Fragment } from 'react';
 
 const componentName = () => {
-  return <Fragment>
-    <h1>Hello world</h1>
+  return <Fragment data-component-trace={'' + ' component-name'}>
+    <h1 data-component-trace={'' + ' component-name'}>Hello world</h1>
   </Fragment>;
 };
 
