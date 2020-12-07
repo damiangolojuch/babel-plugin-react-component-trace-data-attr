@@ -17,11 +17,16 @@ const validTranform = opt => {
 
 const checkValidOptions = state => {
   let attribute = 'data-component-trace'
+  let styledComponentsAttribute = 'data-styled-component-trace'
   let format = 'kebab'
   let separator = ' '
 
   if (isValidOption(state.opts.attribute)) {
     attribute = state.opts.attribute
+  }
+
+  if (isValidOption(state.opts.styledComponentsAttribute)) {
+    styledComponentsAttribute = state.opts.styledComponentsAttribute
   }
 
   if (isValidOption(state.opts.format) && validTranform(state.opts.format)) {
@@ -35,6 +40,7 @@ const checkValidOptions = state => {
   return {
     format: langTransforms[format],
     attribute: attribute,
+    styledComponentsAttribute: styledComponentsAttribute,
     separator: separator
   }
 }
