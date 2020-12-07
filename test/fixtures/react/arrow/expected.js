@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 
 const componentName = () => {
-  return <div data-qa="component-name">
-    <h1>Hello world</h1>
+  return <div data-component-trace={'' + ' component-name'}>
+    <h1 data-component-trace={'' + ' component-name'}>Hello world</h1>
   </div>;
 };
 

@@ -5,8 +5,8 @@ function SubComponent() {
 }
 
 const componentName = () => {
-  return <React.Fragment>
-    <SubCoponent />
+  return <React.Fragment data-component-trace={'' + ' component-name'}>
+    <SubCoponent data-component-trace={'' + ' component-name'} />
   </React.Fragment>;
 };
 

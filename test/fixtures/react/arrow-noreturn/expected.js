@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
-const componentName = () => <div data-qa="component-name">
-    <h1>Hello world</h1>
+const componentName = () => <div data-component-trace={'' + ' component-name'}>
+    <h1 data-component-trace={'' + ' component-name'}>Hello world</h1>
   </div>;
 
 export default componentName;

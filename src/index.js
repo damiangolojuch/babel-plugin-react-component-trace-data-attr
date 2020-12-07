@@ -2,11 +2,13 @@ import checkValidOptions from './options'
 
 const findOrAddDataProperty = (t, properties, identifier, attribute) => {
   for (const prop of properties) {
-    if (prop.key.type === 'StringLiteral' && prop.key.value === attribute) {
+    if (prop.key && prop.key.type === 'StringLiteral' && prop.key.value === attribute) {
       return prop.value;
     }
   }
-  properties.push(t.objectProperty(
+
+  // It's better to unshift instead of push, because last property may be a RestElement (...restProps).
+  properties.unshift(t.objectProperty(
     t.stringLiteral(attribute),
     identifier,
     true,
@@ -14,6 +16,31 @@ const findOrAddDataProperty = (t, properties, identifier, attribute) => {
   ));
   return identifier;
 }
+
+const getParentDataAttrExpression = (t, path, options, functionParent) => {
+  // It is safe to handle nodes with only one param, because probably it is props splitting
+  if (functionParent.node.params.length !== 1) {
+    return;
+  }
+
+  if (functionParent.node.params[0].type === 'ObjectPattern') {
+    return findOrAddDataProperty(
+      t,
+      functionParent.node.params[0].properties,
+      path.scope.generateUidIdentifier(),
+      options.attribute
+    );
+  } else {
+    const elementDataAttr = t.memberExpression(
+      functionParent.node.params[0],
+      t.stringLiteral(options.attribute),
+      true,
+    );
+
+    // functionParent.node.params[0] must be defined
+    return t.logicalExpression("&&", functionParent.node.params[0], elementDataAttr);
+  }
+};
 
 const handleOpeningElement = (t, path, options) => {
   const functionParent = path.getFunctionParent();
@@ -24,30 +51,29 @@ const handleOpeningElement = (t, path, options) => {
   if (!functionParent) return;
 
   if (functionParent.type == "ClassMethod" || functionParent.parent.type == "ClassProperty") {
+    // Class components
     componentName = functionParent.findParent((path) => path.isClassExpression() || path.isClassDeclaration()).node.id.name;
     parentDataAttrExpression = t.memberExpression(
       t.memberExpression(t.thisExpression(), t.identifier('props')),
       t.stringLiteral(options.attribute),
       true,
     );
+
   } else if (functionParent.parent.type === "VariableDeclarator") {
+    // Function components without decorators
     componentName = functionParent.parent.id.name;
-    if (functionParent.node.params.length === 1) {
-      if (functionParent.node.params[0].type === 'ObjectPattern') {
-        parentDataAttrExpression = findOrAddDataProperty(
-          t,
-          functionParent.node.params[0].properties,
-          path.scope.generateUidIdentifier(),
-          options.attribute
-        );
-      } else {
-        parentDataAttrExpression = t.memberExpression(
-          functionParent.node.params[0],
-          t.stringLiteral(options.attribute),
-          true,
-        );
-      }
+    parentDataAttrExpression = getParentDataAttrExpression(t, path, options, functionParent);
+  } else if (functionParent.parent.type === "CallExpression" && (functionParent.parent.callee.name === 'memo' || (functionParent.parent.callee.property && functionParent.parent.callee.property.name === 'memo'))) {
+    // Function components with memo
+    let parentPath = functionParent.parentPath;
+
+    // Looking for variable declaration.
+    while (parentPath.parent.type !== 'VariableDeclarator') {
+      parentPath = parentPath.parentPath;
     }
+
+    componentName = parentPath.parent.id.name;
+    parentDataAttrExpression = getParentDataAttrExpression(t, path, options, functionParent);
   } else {
     return;
   }
