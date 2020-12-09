@@ -86,3 +86,15 @@ const map = {
 };
 
 const comps = [styled.div`color: black;`];
+
+const withConfig = styled.div.attrs({
+  'styled': 'with-config'
+}).withConfig({})`
+  color: black;
+`;
+
+const withAttrs = styled.div.attrs({
+  'styled': 'with-attrs'
+}).attrs({ 'data-x': 'xyz-123' })`
+  color: black;
+`;

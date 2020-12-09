@@ -71,4 +71,12 @@ const map = {
   comp: styled.div`color: black;`
 }
 
-const comps = [styled.div`color: black;`]
+const comps = [styled.div`color: black;`];
+
+const withConfig = styled.div.withConfig({})`
+  color: black;
+`
+
+const withAttrs = styled.div.attrs({ 'data-x': 'xyz-123' })`
+  color: black;
+`

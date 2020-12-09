@@ -1,5 +1,5 @@
 import checkValidOptions from './options'
-import TaggedTemplateExpression from './styled-components'
+import { CallExpression, TaggedTemplateExpression } from './styled-components'
 
 const findOrAddDataProperty = (t, properties, identifier, attribute) => {
   for (const prop of properties) {
@@ -98,6 +98,7 @@ export default function (babel) {
 
   return {
     visitor: {
+      CallExpression,
       TaggedTemplateExpression,
       JSXOpeningElement(path, state) {
         const options = checkValidOptions(state);
