@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 function SubComponent() {
-  return <div data-qa="sub-component">Sub</div>;
+  return <div>Sub</div>;
 }
 
 const componentName = () => {

@@ -1,6 +1,6 @@
 {
   "name": "babel-plugin-react-component-trace-data-attr",
-  "version": "0.2.5",
+  "version": "0.2.7",
   "license": "MIT",
   "description": "Adds data- attribute to html elements showing the trace of React components names that led to this element creation.",
   "repository": {
@@ -17,10 +17,12 @@
     "prepublishOnly": "npm run clean && npm run build"
   },
   "dependencies": {
+    "babel-types": "^6.26.0",
     "lodash.camelcase": "^4.3.0",
     "lodash.isstring": "^4.0.1",
     "lodash.kebabcase": "^4.1.1",
-    "lodash.snakecase": "^4.1.1"
+    "lodash.snakecase": "^4.1.1",
+    "styled-components": "^5.2.1"
   },
   "devDependencies": {
     "babel-cli": "6.26.0",

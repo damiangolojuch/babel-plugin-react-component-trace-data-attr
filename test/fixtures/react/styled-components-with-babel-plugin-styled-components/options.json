@@ -1,0 +1,11 @@
+{
+  "plugins": [
+    "syntax-jsx",
+    ["styled-components", {
+      "ssr": true,
+      "displayName": true,
+      "fileName": true
+    }],
+    ["../../../../src"]
+  ]
+}
